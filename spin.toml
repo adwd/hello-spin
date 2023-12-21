@@ -1,0 +1,81 @@
+spin_manifest_version = 2
+
+[application]
+name = "hello-spin"
+version = "0.1.0"
+authors = []
+description = ""
+
+[[trigger.http]]
+route = "/..."
+component = "hello-spin"
+
+[component.hello-spin]
+source = "target/wasm32-wasi/release/hello_spin.wasm"
+allowed_outbound_hosts = []
+[component.hello-spin.build]
+command = "cargo build --target wasm32-wasi --release"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[[trigger.http]]
+route = "/first/..."
+component = "first-http-rust-component"
+
+[component.first-http-rust-component]
+source = "first-http-rust-component/target/wasm32-wasi/release/first_http_rust_component.wasm"
+allowed_outbound_hosts = []
+[component.first-http-rust-component.build]
+command = "cargo build --target wasm32-wasi --release"
+workdir = "first-http-rust-component"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[[trigger.http]]
+route = "/static/..."
+component = "assets"
+
+[component.assets]
+source = { url = "https://github.com/fermyon/spin-fileserver/releases/download/v0.1.0/spin_static_fs.wasm", digest = "sha256:96c76d9af86420b39eb6cd7be5550e3cb5d4cc4de572ce0fd1f6a29471536cb4" }
+files = [{ source = "assets", destination = "/" }]
+
+[[trigger.http]]
+route = "/static/old.txt"
+component = "my-redirect-component"
+
+[component.my-redirect-component]
+source = { url = "https://github.com/fermyon/spin-redirect/releases/download/v0.1.0/redirect.wasm", digest = "sha256:8bee959843f28fef2a02164f5840477db81d350877e1c22cb524f41363468e52" }
+environment = { DESTINATION = "/static/new.txt" }
+
+[[trigger.http]]
+route = "/kv/..."
+component = "spin-key-value"
+
+[component.spin-key-value]
+source = "spin-key-value/target/wasm32-wasi/release/spin_key_value.wasm"
+allowed_outbound_hosts = []
+key_value_stores = ["default"]
+[component.spin-key-value.build]
+command = "cargo build --target wasm32-wasi --release"
+workdir = "spin-key-value"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[[trigger.http]]
+route = "/s/..."
+component = "url-shortener"
+
+[component.url-shortener]
+source = "url-shortener/target/wasm32-wasi/release/url_shortener.wasm"
+allowed_outbound_hosts = []
+[component.url-shortener.build]
+command = "cargo build --target wasm32-wasi --release"
+workdir = "url-shortener"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[[trigger.http]]
+route = "/ts/..."
+component = "my-ts-component"
+
+[component.my-ts-component]
+source = "my-ts-component/target/my-ts-component.wasm"
+[component.my-ts-component.build]
+command = "npm run build"
+workdir = "my-ts-component"
